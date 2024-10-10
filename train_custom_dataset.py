@@ -122,8 +122,9 @@ def main():
 
                         # [b, update_step+1]
                     accs = np.array(accs_all_test).mean(axis=0).astype(np.float16)
-                    mean_loss = (np.array(losses_all_test).mean(axis=0).astype(np.float16)).mean()
-                    mean_loss_q = (np.array(losses_q_all_test).mean(axis=0).astype(np.float16)).mean()
+                    losses_all_test = [torch.tensor(0.3, device='cuda:0'), torch.tensor(0.6, device='cuda:0')]
+                    mean_loss = (np.array([loss.cpu().numpy() for loss in losses_all_test]).mean(axis=0).astype(np.float16)).mean()
+                    mean_loss_q = (np.array([loss.cpu().numpy() for loss in losses_all_test]).mean(axis=0).astype(np.float16)).mean()
 
                     print('Test accuracies: \t', accs)
                     print('Mean test acc: {}  Mean support loss:  {}   Mean query loss: {}'.format(np.mean(accs), mean_loss,
@@ -154,7 +155,8 @@ def main():
         test_losses_query.extend([l.item() for l in losses_q])
         test_logits_all.extend([torch.Tensor.cpu(l).detach().numpy() for l in logits])
         preds['true_label'] = [cls.item() for i in range(preds.shape[0])]
-        predictions_and_labels = predictions_and_labels.append(preds)
+        #predictions_and_labels = predictions_and_labels.append(preds)
+        predictions_and_labels = pd.concat([predictions_and_labels, preds], ignore_index=True)
 
     # log the mean test accuracy data for later display
     with open(args.accuracy_log_file, 'w') as f:
