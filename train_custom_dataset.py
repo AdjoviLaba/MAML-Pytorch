@@ -12,7 +12,6 @@ from torch.nn import functional as F
 from meta import Meta
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import f1_score
-from torchvision import transforms
 
 
 def mean_confidence_interval(accs, confidence=0.95):
@@ -64,32 +63,17 @@ def main():
     validation_image_directory = args.validation_dir
     test_image_directory = args.test_dir
 
-
-    # Data augmentation transforms for training
-    train_transform = transforms.Compose([
-      transforms.RandomResizedCrop(84),
-      transforms.RandomHorizontalFlip(),
-      transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
-      transforms.ToTensor(),
-      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-      ])
-    # Validation and test transforms (just resize and normalize)
-    val_test_transform = transforms.Compose([
-      transforms.Resize(92),
-      transforms.CenterCrop(84),
-      transforms.ToTensor(),
-      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-      ])
-
     mini = MiniImagenet(train_image_directory, mode='train', n_way=args.n_way, k_shot=args.k_spt,
-                    k_query=args.k_qry, batchsz=50, resize=args.imgsz, transform=train_transform)
+                        k_query=args.k_qry,
+                        batchsz=50, resize=args.imgsz)
 
     mini_validate = MiniImagenet(validation_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
-                             k_query=args.k_qry, batchsz=50, resize=args.imgsz, transform=val_test_transform)
+                             k_query=args.k_qry,
+                             batchsz=50, resize=args.imgsz)
 
     mini_test = MiniImagenet(test_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
-                         k_query=args.k_qry, batchsz=50, resize=args.imgsz, transform=val_test_transform)
-
+                          k_query=args.k_qry,
+                          batchsz=50, resize=args.imgsz)
     db = DataLoader(mini, args.task_num, shuffle=True, num_workers=1, pin_memory=True)
 
     ft = args.run_further_training
