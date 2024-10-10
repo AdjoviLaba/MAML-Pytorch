@@ -22,7 +22,7 @@ class MiniImagenet(Dataset):
     sets: conains n_way * k_shot for meta-train set, n_way * n_query for meta-test set.
     """
 
-    def __init__(self, root, mode, batchsz, n_way, k_shot, k_query, resize, startidx=0):
+    def __init__(self, root, mode, batchsz, n_way, k_shot, k_query, resize, startidx=0,transform=None):
         """
 
         :param root: root path of mini-imagenet
@@ -47,7 +47,7 @@ class MiniImagenet(Dataset):
             mode, batchsz, n_way, k_shot, k_query, resize))
 
         if mode == 'train':
-            self.transform = transforms.Compose([lambda x: Image.open(x).convert('RGB'),
+            self.transform = transforms.Compose([
                                                  transforms.Resize((self.resize, self.resize)),
                                                  # transforms.RandomHorizontalFlip(),
                                                  # transforms.RandomRotation(5),
@@ -55,7 +55,7 @@ class MiniImagenet(Dataset):
                                                  transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                                                  ])
         else:
-            self.transform = transforms.Compose([lambda x: Image.open(x).convert('RGB'),
+            self.transform = transforms.Compose([
                                                  transforms.Resize((self.resize, self.resize)),
                                                  transforms.ToTensor(),
                                                  transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -174,11 +174,19 @@ class MiniImagenet(Dataset):
 
         # print('relative:', support_y_relative, query_y_relative)
 
+        # Transform and load support set images
         for i, path in enumerate(flatten_support_x):
-            support_x[i] = self.transform(path)
+            img = Image.open(path).convert('RGB')  # Load image
+            if self.transform:
+                img = self.transform(img)  # Apply transform
+            support_x[i] = img
 
+        # Transform and load query set images
         for i, path in enumerate(flatten_query_x):
-            query_x[i] = self.transform(path)
+            img = Image.open(path).convert('RGB')  # Load image
+            if self.transform:
+                img = self.transform(img)  # Apply transform
+            query_x[i] = img
 
         return support_x, torch.LongTensor(support_y_relative), query_x, torch.LongTensor(query_y_relative), \
                self.labels_for_batches[index]
