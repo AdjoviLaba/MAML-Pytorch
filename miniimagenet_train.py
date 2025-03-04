@@ -3,6 +3,8 @@ import  numpy as np
 from    MiniImagenet import MiniImagenet
 import  scipy.stats
 from    torch.utils.data import DataLoader
+
+from    eeg_dataset import EEGDataset  
 from    torch.optim import lr_scheduler
 import  random, sys, pickle
 import  argparse
