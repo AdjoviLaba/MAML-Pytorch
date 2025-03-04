@@ -1,7 +1,7 @@
 import torch, os
 import numpy as np
 import pandas as pd
-from MiniImagenet import MiniImagenet
+from EEGDataset import EEGDataset
 import scipy.stats
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
@@ -63,15 +63,15 @@ def main():
     validation_image_directory = args.validation_dir
     test_image_directory = args.test_dir
 
-    mini = MiniImagenet(train_image_directory, mode='train', n_way=args.n_way, k_shot=args.k_spt,
+    mini = EEGDataset(train_image_directory, mode='train', n_way=args.n_way, k_shot=args.k_spt,
                         k_query=args.k_qry,
                         batchsz=50, resize=args.imgsz)
 
-    mini_validate = MiniImagenet(validation_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
+    mini_validate = EEGDataset(validation_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
                              k_query=args.k_qry,
                              batchsz=50, resize=args.imgsz)
 
-    mini_test = MiniImagenet(test_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
+    mini_test = EEGDataset(test_image_directory, mode='test', n_way=args.n_way, k_shot=args.k_spt,
                           k_query=args.k_qry,
                           batchsz=50, resize=args.imgsz)
     db = DataLoader(mini, args.task_num, shuffle=True, num_workers=1, pin_memory=True)
@@ -80,7 +80,7 @@ def main():
     if ft:
         further_training_image_directory = args.further_training_dir
 
-        mini_imagenet_further_training = MiniImagenet(further_training_image_directory, mode='train', n_way=args.n_way, k_shot=args.k_spt,
+        mini_imagenet_further_training = EEGDataset(further_training_image_directory, mode='train', n_way=args.n_way, k_shot=args.k_spt,
                                       k_query=args.k_qry,
                                       batchsz=50, resize=args.imgsz)
         db_further_training = DataLoader(mini_imagenet_further_training, args.task_num, shuffle=True, num_workers=1, pin_memory=True)
